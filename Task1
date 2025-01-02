@@ -1,0 +1,125 @@
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+import numpy as np
+
+# Function to extract data
+def extract_data(file_path="sample_data.csv"):
+    """
+    Extract data from a CSV file.
+
+    Parameters:
+        file_path (str): Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: Extracted data.
+    """
+    return pd.read_csv(file_path)
+
+# Function to preprocess data
+def preprocess_data(data):
+    """
+    Preprocess the data by handling missing values and duplicates.
+
+    Parameters:
+        data (pd.DataFrame): Raw data.
+
+    Returns:
+        pd.DataFrame: Cleaned data.
+    """
+    # Handling missing values (filling with mean for numeric and mode for categorical)
+    for column in data.columns:
+        if data[column].dtype in [np.float64, np.int64]:
+            data[column].fillna(data[column].mean(), inplace=True)
+        else:
+            data[column].fillna(data[column].mode()[0], inplace=True)
+
+    # Removing duplicates
+    data.drop_duplicates(inplace=True)
+
+    return data
+
+# Function to transform data
+def transform_data(data):
+    """
+    Transform the data by scaling numerical features and encoding categorical features.
+
+    Parameters:
+        data (pd.DataFrame): Preprocessed data.
+
+    Returns:
+        np.ndarray: Transformed data.
+    """
+    # Identifying numerical and categorical columns
+    numeric_features = data.select_dtypes(include=['int64', 'float64']).columns
+    categorical_features = data.select_dtypes(include=['object']).columns
+
+    # Preprocessing pipelines for both numeric and categorical data
+    numeric_transformer = Pipeline(steps=[
+        ('scaler', StandardScaler())
+    ])
+
+    categorical_transformer = Pipeline(steps=[
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))
+    ])
+
+    # Combining the transformations
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numeric_transformer, numeric_features),
+            ('cat', categorical_transformer, categorical_features)
+        ])
+
+    # Applying the transformations
+    transformed_data = preprocessor.fit_transform(data)
+
+    # Optionally, applying PCA for dimensionality reduction (if needed)
+    pca = PCA(n_components=0.95)  # Retain 95% of variance
+    transformed_data = pca.fit_transform(transformed_data)
+
+    return transformed_data
+
+# Function to load data
+def load_data(transformed_data, output_path):
+    """
+    Load the transformed data into a CSV file.
+
+    Parameters:
+        transformed_data (np.ndarray): Transformed data.
+        output_path (str): Path to save the transformed data.
+    """
+    # Converting transformed data back to a DataFrame
+    output_df = pd.DataFrame(transformed_data)
+
+    # Saving to a CSV file
+    output_df.to_csv(output_path, index=False)
+
+# Main function to automate the ETL process
+def etl_pipeline(input_file="sample_data.csv", output_file="transformed_data.csv"):
+    """
+    Automate the ETL process.
+
+    Parameters:
+        input_file (str): Path to the input CSV file.
+        output_file (str): Path to the output CSV file.
+    """
+    # Step 1: Extract
+    raw_data = extract_data(input_file)
+
+    # Step 2: Preprocess
+    cleaned_data = preprocess_data(raw_data)
+
+    # Step 3: Transform
+    transformed_data = transform_data(cleaned_data)
+
+    # Step 4: Load
+    load_data(transformed_data, output_file)
+
+    print("ETL pipeline completed successfully.")
+
+# Example usage
+if __name__ == "__main__":
+    etl_pipeline()
