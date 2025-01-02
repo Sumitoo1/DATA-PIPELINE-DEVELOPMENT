@@ -6,7 +6,8 @@ Duration:December 30th, 2024 to January 30th, 2025
 Mentor:Neela Kumar
 
 Overview of the Project:
-![DALL·E 2025-01-02 20 21 31 - A computer screen displaying the successful execution of a Python ETL pipeline script  The terminal or code editor window shows the code running (as a](https://github.com/user-attachments/assets/b0488fe6-dd62-4f1c-af96-a7e116e8161f)
+![Screenshot 2025-01-02 210252](https://github.com/user-attachments/assets/25c02636-2173-4cbd-9420-21c0730233f8)
+
 Project Overview: Developing a Data Pipeline for ETL
 Project Name
 ETL Pipeline Automation for Data Processing
